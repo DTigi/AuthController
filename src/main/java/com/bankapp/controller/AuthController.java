@@ -32,6 +32,8 @@ public class AuthController {
     private final Timer loginTimer;
     private final DistributionSummary passwordLengthSummary;
 
+    private Integer currentTimeout = 10;  // Дефолтное значение таймаута
+
     @Autowired
     public AuthController(ClientService clientService, SessionManager sessionManager, MeterRegistry meterRegistry) {
         this.clientService = clientService;
@@ -72,8 +74,8 @@ public class AuthController {
     @Operation(summary = "Установка таймаута перед ответом", description = "Устанавливает таймаут перед ответом на запрос пользователя")
     @PostMapping("/setTimeout")
     public ResponseEntity<String> setTimeout(@RequestParam(defaultValue = "10") Integer timeout) {
-        Integer tmp = timeout;
-        return ResponseEntity.ok("");
+        this.currentTimeout = timeout;  // Обновляем значение
+        return ResponseEntity.ok("Таймаут установлен: " + timeout);
     }
 
     @Observed(name = "auth.login", contextualName = "auth#login", lowCardinalityKeyValues = {"endpoint", "login"})
@@ -85,7 +87,7 @@ public class AuthController {
             passwordLengthSummary.record(password.length());
 
             try {
-                Thread.sleep(tmp); // tmp
+                Thread.sleep(currentTimeout); // tmp
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
