@@ -71,8 +71,8 @@ public class AuthController {
     @Observed(name = "auth.set-timeout", contextualName = "auth#setTimeout", lowCardinalityKeyValues = {"endpoint", "setTimeout"})
     @Operation(summary = "Установка таймаута перед ответом", description = "Устанавливает таймаут перед ответом на запрос пользователя")
     @PostMapping("/setTimeout")
-    public ResponseEntity<String> setTimeout(@RequestParam Integer timeout) {
-//        tmp=timeout;
+    public ResponseEntity<String> setTimeout(@RequestParam(defaultValue = "10") Integer timeout) {
+        Integer tmp = timeout;
         return ResponseEntity.ok("");
     }
 
