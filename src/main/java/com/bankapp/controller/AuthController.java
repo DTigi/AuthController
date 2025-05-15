@@ -85,7 +85,7 @@ public class AuthController {
             passwordLengthSummary.record(password.length());
 
             try {
-                Thread.sleep(10); // tmp
+                Thread.sleep(tmp); // tmp
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
