@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import jakarta.annotation.PostConstruct;
 
 @RestController
 @RequestMapping("/auth")
@@ -25,21 +26,24 @@ public class AuthController {
 
     private final ClientService clientService;
     private final SessionManager sessionManager;
-    private final MeterRegistry meterRegistry;
+
+    @Autowired
+    private MeterRegistry meterRegistry;
 
     private final AtomicInteger userCount = new AtomicInteger(0);
-    private final Counter loginCounter;
-    private final Timer loginTimer;
-    private final DistributionSummary passwordLengthSummary;
+    private Counter loginCounter;
+    private Timer loginTimer;
+    private DistributionSummary passwordLengthSummary;
 
     private Integer currentTimeout = 10;  // Дефолтное значение таймаута
 
-    @Autowired
-    public AuthController(ClientService clientService, SessionManager sessionManager, MeterRegistry meterRegistry) {
+    public AuthController(ClientService clientService, SessionManager sessionManager) {
         this.clientService = clientService;
         this.sessionManager = sessionManager;
-        this.meterRegistry = meterRegistry;
+    }
 
+        @PostConstruct
+        private void initMetrics() {
         // Counter
         this.loginCounter = Counter.builder("auth.login.count")
                 .description("Счётчик успешных входов")
@@ -75,7 +79,7 @@ public class AuthController {
     @PostMapping("/setTimeout")
     public ResponseEntity<String> setTimeout(@RequestParam(defaultValue = "10") Integer timeout) {
         this.currentTimeout = timeout;  // Обновляем значение
-        return ResponseEntity.ok("Таймаут установлен: " + timeout);
+        return ResponseEntity.ok("Таймаут установлен: " + timeout + "millis");
     }
 
     @Observed(name = "auth.login", contextualName = "auth#login", lowCardinalityKeyValues = {"endpoint", "login"})
